@@ -1,6 +1,6 @@
 ﻿# exercice_2017 = [
 
-	# # [ Opération, Date, Motif, Vérification, Débit, Crédit, Date saisie ]
+	# # [ Id, Opération, Date, Motif, Vérification, Débit, Crédit, Date saisie ]
 	# [1, "CB", "2017-11-10", "Super U", 0, 29.51, 0, "2017-11-28 15:23"],
 	# [2, "CB", "2017-11-10", "Fournil d'Elina", 1, 9.20, 0, "2017-11-28 15:27"],
 	# [3, "CB", "2017-11-11", "Essence", 1, 55.01, 0, "2017-11-29 12:01"],
@@ -16,7 +16,7 @@
 # Lecture / écriture dans le fichier binaire "comptes"
 import pickle
 
-# Permet de détecter l'OS pour vider la console > fonction clear()
+# Permet de détecter l'OS pour vider la console > fonction idar()
 import platform
 
 # Support des expressions régulières
@@ -71,10 +71,10 @@ def affichMenu(fichier, exercice):
 
 
 # Vérifie si une opération est enregistrée
-def check(exercice, cle):
+def check(exercice, id):
 	verif = False
 	for operation in exercice:
-		if operation[0] == cle:
+		if operation[0] == id:
 			verif = True
 			new_operation = operation
 	if verif:
@@ -87,7 +87,7 @@ def check(exercice, cle):
 # Ajout d'une nouvelle opération
 def newOperation(exercice):
 
-	cle = max(exercice)[0] + 1
+	id = max(exercice)[0] + 1
 	annee = str(datetime.date.today().year)
 
 	print("\nNouvelle operation :", "\n")
@@ -141,7 +141,7 @@ def newOperation(exercice):
 	date_saisie = time.strftime("%Y-%m-%d %H:%M", time.localtime())
 		
 	# Ajout de la nouvelle opération
-	new = [cle, typ, date_ope, motif, verif, debit, credit, date_saisie]
+	new = [id, typ, date_ope, motif, verif, debit, credit, date_saisie]
 	exercice.append(new)
 
 	# Sauvegarde de la liste dans le fichier binaire "data"
@@ -149,7 +149,7 @@ def newOperation(exercice):
 
 	# Confirme l'enregistrement
 	exercice = loadComptes("data")
-	check(exercice, cle)
+	check(exercice, id)
 	
 	# Affiche le menu
 	affichMenu(exercice)
@@ -206,12 +206,59 @@ def solde(base, exercice, solde_banque = False):
 
 	return solde
 
+# [ Id, Opération, Date, Motif, Vérification, Débit, Crédit, Date saisie ]
 
+# Filtre les operations selon plusieurs parametres
+# p est un dictionnaire attendant les clés suivantes : id, type, debut, fin, motif, verif, debit, credit, saisie
+def filterComptes(**p):
+	
+	# Liste stockant les paramètres de filtrage
+	filtre = list()
+	
+	for key, value in p.items():
+	
+		if key == "id":
+			condition = "operation[0] == " + str(value)
+			filtre.append(condition)
+			continue
+		elif key == "type":
+			condition = "operation[1] == \"" + value + "\""
+			filtre.append(condition)
+			continue
+		elif key == "debut":
+			condition = "\"" + value + "\" <= operation[2]"
+			filtre.append(condition)
+			continue
+		elif key == "fin":
+			condition = " <= \"" + value + "\""
+			filtre[len(filtre)-1] += condition
+			continue
+		elif key == "motif":
+			condition = "operation[3] == \"" + value + "\""
+			filtre.append(condition)
+			continue
+		elif key == "verif":
+			condition = "operation[4] == " + str(value)
+			filtre.append(condition)
+			continue
+		elif key == "debit":
+			condition = "operation[5] == " + str(value)
+			filtre.append(condition)
+			continue
+		elif key == "credit":
+			condition = "operation[6] == " + str(value)
+			filtre.append(condition)
+			continue
+	
+	# Liste "filtre" concaténée en chaine avec separateurs " and "
+	return " and ".join(filtre)
+
+	
 # Affichage des opérations
 def affichComptes(fichier, exercice, attente=False):
 
 	# Largeur de colonne
-	w_cle = 5
+	w_id = 5
 	w_type = 5
 	w_date = 12
 	w_motif = 25
@@ -227,7 +274,7 @@ def affichComptes(fichier, exercice, attente=False):
 	for operation in exercice:
 
 		# Stockage des composantes d'une opération dans des variables
-		cle = str(operation[0])
+		id = str(operation[0])
 		type = operation[1]
 		date = str(operation[2])
 		motif = operation[3]
@@ -237,7 +284,7 @@ def affichComptes(fichier, exercice, attente=False):
 		saisie = str(operation[7])
 
 		# Largeur du contenu
-		len_cle = len(str(cle))
+		len_id = len(str(id))
 		len_type = len(type)
 		len_motif = len(motif)
 		len_verif = len(verif)
@@ -246,7 +293,7 @@ def affichComptes(fichier, exercice, attente=False):
 		len_saisie = len(saisie)
 
 		# Largeur des espaces blancs à ajouter
-		ws_cle = w_cle - len_cle
+		ws_id = w_id - len_id
 		ws_type = w_type - len_type
 		ws_motif = w_motif - len_motif
 		ws_verif = w_verif - len_verif
@@ -254,7 +301,7 @@ def affichComptes(fichier, exercice, attente=False):
 		ws_credit = w_credit - len_credit
 		ws_saisie = w_saisie - len_saisie
 
-		ligne = cle + (ws_cle * " ") + type + (ws_type * " ") + date + (2 * " ") +	motif + (ws_motif * " ") + verif + (ws_verif * " ") + (ws_debit * " ") + "-" + debit + (ws_credit * " ") + "+" + credit + (ws_saisie * " ") + saisie
+		ligne = id + (ws_id * " ") + type + (ws_type * " ") + date + (2 * " ") +	motif + (ws_motif * " ") + verif + (ws_verif * " ") + (ws_debit * " ") + "-" + debit + (ws_credit * " ") + "+" + credit + (ws_saisie * " ") + saisie
 
 		print(ligne)
 	
@@ -264,9 +311,9 @@ def affichComptes(fichier, exercice, attente=False):
 
 
 # Vide la console Python
-def clear(p):
+def idar(p):
     # p est l'OS
-    commands = {"Windows": "cls", "Linux": "clear"}
+    commands = {"Windows": "cls", "Linux": "idar"}
     try:
         os.system(commands[p])
     except: # empty string or Java os name
