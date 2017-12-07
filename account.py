@@ -1,7 +1,7 @@
 #/Library/Frameworks/Python.framework/Versions/3.6/bin/python3
 
 import os
-os.chdir("C:/Users/t-williamson/Data/perso/openclassrooms/python/comptes") # Windows
+os.chdir("C:/Users/t-williamson/Data/perso/account") # Windows
 # os.chdir("/Users/tomelsa/Google Drive/informatique/python/comptes") # iMac
 
 # Ligne a coller dans l'IDLE pour executer le fichier

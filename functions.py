@@ -206,11 +206,61 @@ def solde(base, exercice, solde_banque = False):
 
 	return solde
 
-# [ Id, Opération, Date, Motif, Vérification, Débit, Crédit, Date saisie ]
 
+# Affichage des opérations
+def affichComptes(fichier, exercice):
+
+	# Largeur de colonne
+	w_id = 5
+	w_type = 5
+	w_date = 12
+	w_motif = 25
+	w_verif = 1
+	w_debit = 10
+	w_credit = 10
+	w_saisie = 18
+	
+	for operation in exercice:
+
+		# Stockage des composantes d'une opération dans des variables
+		id = str(operation[0])
+		type = operation[1]
+		date = str(operation[2])
+		motif = operation[3]
+		verif = "x" if operation[4] == 1 else ""
+		debit = str("{0:.2f}".format(operation[5]))
+		credit = str("{0:.2f}".format(operation[6]))
+		saisie = str(operation[7])
+
+		# Largeur du contenu
+		len_id = len(str(id))
+		len_type = len(type)
+		len_motif = len(motif)
+		len_verif = len(verif)
+		len_debit = len(debit)
+		len_credit = len(credit)
+		len_saisie = len(saisie)
+
+		# Largeur des espaces blancs à ajouter
+		ws_id = w_id - len_id
+		ws_type = w_type - len_type
+		ws_motif = w_motif - len_motif
+		ws_verif = w_verif - len_verif
+		ws_debit = w_debit - len_debit
+		ws_credit = w_credit - len_credit
+		ws_saisie = w_saisie - len_saisie
+
+		ligne = id + (ws_id * " ") + type + (ws_type * " ") + date + (2 * " ") +	motif + (ws_motif * " ") + verif + (ws_verif * " ") + (ws_debit * " ") + "-" + debit + (ws_credit * " ") + "+" + credit + (ws_saisie * " ") + saisie
+
+		print(ligne)
+	
+	# Affiche le menu
+	affichMenu(fichier, exercice)
+	
+	
 # Filtre les operations selon plusieurs parametres
 # p est un dictionnaire attendant les clés suivantes : id, type, debut, fin, motif, verif, debit, credit, saisie
-def filterComptes(**p):
+def filterComptes(exercice, **p):
 	
 	# Liste stockant les paramètres de filtrage
 	filtre = list()
@@ -251,63 +301,13 @@ def filterComptes(**p):
 			continue
 	
 	# Liste "filtre" concaténée en chaine avec separateurs " and "
-	return " and ".join(filtre)
-
+	filtre = " and ".join(filtre)
 	
-# Affichage des opérations
-def affichComptes(fichier, exercice, attente=False):
-
-	# Largeur de colonne
-	w_id = 5
-	w_type = 5
-	w_date = 12
-	w_motif = 25
-	w_verif = 1
-	w_debit = 10
-	w_credit = 10
-	w_saisie = 18
+	# Filtrage des operations sur la liste "exercice"
+	exercice = [operation for operation in exercice if filtre]
 	
-	# Si attente=True : seules les operations en attente de verification sont selectionnees
-	if attente:
-		exercice = [operation for operation in exercice if operation[4] == 0]
-	
-	for operation in exercice:
-
-		# Stockage des composantes d'une opération dans des variables
-		id = str(operation[0])
-		type = operation[1]
-		date = str(operation[2])
-		motif = operation[3]
-		verif = "x" if operation[4] == 1 else ""
-		debit = str("{0:.2f}".format(operation[5]))
-		credit = str("{0:.2f}".format(operation[6]))
-		saisie = str(operation[7])
-
-		# Largeur du contenu
-		len_id = len(str(id))
-		len_type = len(type)
-		len_motif = len(motif)
-		len_verif = len(verif)
-		len_debit = len(debit)
-		len_credit = len(credit)
-		len_saisie = len(saisie)
-
-		# Largeur des espaces blancs à ajouter
-		ws_id = w_id - len_id
-		ws_type = w_type - len_type
-		ws_motif = w_motif - len_motif
-		ws_verif = w_verif - len_verif
-		ws_debit = w_debit - len_debit
-		ws_credit = w_credit - len_credit
-		ws_saisie = w_saisie - len_saisie
-
-		ligne = id + (ws_id * " ") + type + (ws_type * " ") + date + (2 * " ") +	motif + (ws_motif * " ") + verif + (ws_verif * " ") + (ws_debit * " ") + "-" + debit + (ws_credit * " ") + "+" + credit + (ws_saisie * " ") + saisie
-
-		print(ligne)
-	
-	# Affiche le menu
-	affichMenu(fichier, exercice)
-		
+	# Affichage du resultat
+	affichComptes(fichier, exercice)
 
 
 # Vide la console Python
