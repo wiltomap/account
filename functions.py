@@ -1,4 +1,4 @@
-﻿# exercice_2017 = [
+﻿# ex = [
 
 	# # [ Id, Opération, Date, Motif, Vérification, Débit, Crédit, Date saisie ]
 	# [1, "CB", "2017-11-10", "Super U", 0, 29.51, 0, "2017-11-28 15:23"],
@@ -44,15 +44,16 @@ def affichMenu(fichier, exercice):
 	marq  = "2 : Marquer une operation"
 	maj   = "3 : Mettre a jour une operation"
 	suppr = "4 : Supprimer une operation"
-	aff0  = "5 : Afficher les operations non-verifiees"
-	exit  = "6 : Quitter"
+	aff0  = "5 : Afficher les operations en attente"
+	aff0  = "6 : Filtrer les operations"
+	exit  = "7 : Quitter"
 	line  = 31 * "_"
 
 	print(line, ajout, marq, maj, suppr, aff0, exit, "\n", sep = "\n")
 
 	choix = int(input("Que souhaitez-vous faire ? "))
 
-	while choix <= 0 or choix >= 7:
+	while choix <= 0 or choix >= 8:
 		print("Ce choix n'est pas possible...\n")
 		choix = int(input("Que souhaitez-vous faire ? "))
 
@@ -65,7 +66,9 @@ def affichMenu(fichier, exercice):
 	elif choix == 4:
 		pass
 	elif choix == 5:
-		affichComptes(fichier, exercice, attente=True)
+		filterComptes(exercice, **{"verif": 0})
+	elif choix == 6:
+		filterComptes(exercice)
 	else:
 		exit()
 
@@ -304,14 +307,14 @@ def filterComptes(exercice, **p):
 	filtre = " and ".join(filtre)
 	
 	# Filtrage des operations sur la liste "exercice"
-	exercice = [operation for operation in exercice if filtre]
+	exercice = [operation for operation in exercice if eval(filtre)]
 	
 	# Affichage du resultat
 	affichComptes(fichier, exercice)
 
 
 # Vide la console Python
-def idar(p):
+def clear(p):
     # p est l'OS
     commands = {"Windows": "cls", "Linux": "idar"}
     try:

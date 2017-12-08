@@ -5,7 +5,7 @@ os.chdir("C:/Users/t-williamson/Data/perso/account") # Windows
 # os.chdir("/Users/tomelsa/Google Drive/informatique/python/comptes") # iMac
 
 # Ligne a coller dans l'IDLE pour executer le fichier
-# exec(open("C:/Users/t-williamson/Data/perso/openclassrooms/python/comptes/pycompte.py").read(), globals())
+# exec(open("C:/Users/t-williamson/Data/perso/account/account.py").read(), globals())
 
 # Fichier contenant les fonctions necessaires au programme
 from functions import *
