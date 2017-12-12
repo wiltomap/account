@@ -45,11 +45,11 @@ def affichMenu(fichier, exercice):
 	maj   = "3 : Mettre a jour une operation"
 	suppr = "4 : Supprimer une operation"
 	aff0  = "5 : Afficher les operations en attente"
-	aff0  = "6 : Filtrer les operations"
+	aff1  = "6 : Filtrer les operations"
 	exit  = "7 : Quitter"
 	line  = 31 * "_"
 
-	print(line, ajout, marq, maj, suppr, aff0, exit, "\n", sep = "\n")
+	print(line, ajout, marq, maj, suppr, aff0, aff1, exit, "\n", sep = "\n")
 
 	choix = int(input("Que souhaitez-vous faire ? "))
 
@@ -262,55 +262,28 @@ def affichComptes(fichier, exercice):
 	
 	
 # Filtre les operations selon plusieurs parametres
-# p est un dictionnaire attendant les clés suivantes : id, type, debut, fin, motif, verif, debit, credit, saisie
+# p est un dictionnaire attendant les cles suivantes : id, type, debut, fin, motif, verif, debit, credit, saisie
 def filterComptes(exercice, **p):
+
+	champs = { "id": 0, "type": 1, "date": 3, "motif": 4, "verif": 5, "debit": 6, "credit": 7, "saisie": 8 }
+
+	def conditions(**p):
 	
-	# Liste stockant les paramètres de filtrage
-	filtre = list()
+		def filtre(ope):
+		
+			for key, value in p.items():
+				if ope[champs[key]] != value:
+					return False
+			return True
+		
+		return filtre
 	
-	for key, value in p.items():
-	
-		if key == "id":
-			condition = "operation[0] == " + str(value)
-			filtre.append(condition)
-			continue
-		elif key == "type":
-			condition = "operation[1] == \"" + value + "\""
-			filtre.append(condition)
-			continue
-		elif key == "debut":
-			condition = "\"" + value + "\" <= operation[2]"
-			filtre.append(condition)
-			continue
-		elif key == "fin":
-			condition = " <= \"" + value + "\""
-			filtre[len(filtre)-1] += condition
-			continue
-		elif key == "motif":
-			condition = "operation[3] == \"" + value + "\""
-			filtre.append(condition)
-			continue
-		elif key == "verif":
-			condition = "operation[4] == " + str(value)
-			filtre.append(condition)
-			continue
-		elif key == "debit":
-			condition = "operation[5] == " + str(value)
-			filtre.append(condition)
-			continue
-		elif key == "credit":
-			condition = "operation[6] == " + str(value)
-			filtre.append(condition)
-			continue
-	
-	# Liste "filtre" concaténée en chaine avec separateurs " and "
-	filtre = " and ".join(filtre)
 	
 	# Filtrage des operations sur la liste "exercice"
-	exercice = [operation for operation in exercice if eval(filtre)]
+	resultat = list(filter(conditions(**p), exercice))
 	
 	# Affichage du resultat
-	affichComptes(fichier, exercice)
+	affichComptes("data", resultat)
 
 
 # Vide la console Python
