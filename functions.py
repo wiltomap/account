@@ -68,7 +68,7 @@ def affichMenu(fichier, exercice):
 	elif choix == 5:
 		filterComptes(exercice, **{"verif": 0})
 	elif choix == 6:
-		filterComptes(exercice)
+		affichFilter()
 	else:
 		exit()
 
@@ -86,6 +86,18 @@ def check(exercice, id):
 	else:
 		print("Opération absente...")
 
+		
+# Conversion d'une date saisie en jj/mm ou jj/mm/aaaa -> aaaa-mm-jj
+def conversionDate(date):
+
+	if re.match(jm, date):
+	    date = "{}-{}-{}".format(annee, date[3:], date[:2])
+	
+	if re.match(jma, date):
+	    date = "{}-{}-{}".format(date[6:], date[3:5], date[:2])
+	
+	return date
+	
 
 # Ajout d'une nouvelle opération
 def newOperation(exercice):
@@ -96,18 +108,14 @@ def newOperation(exercice):
 	print("\nNouvelle operation :", "\n")
 
 	typ = input("Type : ")
-	date_ope = input("Date : ")
+	date = input("Date : ")
 	
 	# Gestion de la date
-	while not re.match(jm, date_ope) and not re.match(jma, date_ope):
+	while not re.match(jm, date) and not re.match(jma, date):
 		print("La date n'est pas au bon format (jj/mm ou jj/mm/aaaa) !")
-		date_ope = input("Date : ")
+		date = input("Date : ")
 		
-	if re.match(jm, date_ope):
-	    date_ope = "{}-{}-{}".format(annee, date_ope[3:], date_ope[:2])
-	
-	if re.match(jma, date_ope):
-	    date_ope = "{}-{}-{}".format(date_ope[6:], date_ope[3:5], date_ope[:2])
+	date = conversionDate(date)
 	
 	motif = input("Motif : ")
 	
@@ -144,7 +152,7 @@ def newOperation(exercice):
 	date_saisie = time.strftime("%Y-%m-%d %H:%M", time.localtime())
 		
 	# Ajout de la nouvelle opération
-	new = [id, typ, date_ope, motif, verif, debit, credit, date_saisie]
+	new = [id, typ, date, motif, verif, debit, credit, date_saisie]
 	exercice.append(new)
 
 	# Sauvegarde de la liste dans le fichier binaire "data"
@@ -223,6 +231,8 @@ def affichComptes(fichier, exercice):
 	w_credit = 10
 	w_saisie = 18
 	
+	print("\n")
+	
 	for operation in exercice:
 
 		# Stockage des composantes d'une opération dans des variables
@@ -259,13 +269,91 @@ def affichComptes(fichier, exercice):
 	
 	# Affiche le menu
 	affichMenu(fichier, exercice)
+
+
+# Menu de filtrage	
+def affichFilter():
+
+	id      = "1 : Filtrer par référence"
+	type    = "2 : Filtrer par type d'operation"
+	date    = "3 : Filtrer par date d'operation"
+	motif   = "4 : Filtrer par motif"
+	verif   = "5 : Filtrer par verification"
+	montant = "6 : Filtrer par montant"
+	saisie  = "7 : Filtrer par date de saisie"
+	
+	print("\n", id, type, date, motif, verif, montant, saisie, "\n", sep = "\n")
+
+	choix = input("Filtre(s) à appliquer ? ")
+	
+	filtre = dict()
+	
+	for c in choix:
+	
+		if c == '1':
+			fid = input("id : ")
+			filtre["id"] = int(fid)
+			
+		elif c == '2':
+			ftype = input("Type (CB / WEB / RET / DC / VIR / Numero de cheque): ")
+			filtre["type"] = ftype
+			
+		elif c == '3':
+			fdate = input("Date operation : ")
+			
+			while not re.match(jm, fdate) and not re.match(jma, fdate):
+				print("La date n'est pas au bon format (jj/mm ou jj/mm/aaaa) !")
+				fdate = input("Date operation : ")
+				
+			fdate = conversionDate(fdate)
+			filtre["date"] = fdate
+			
+		elif c == '4':
+			fmotif = input("Motif : ")
+			filtre["fmotif"] = fmotif
+			
+		elif c == '5':
+			fverif = input("Verification (0/1) : ")
+			filtre["verif"] = int(fverif)
+			
+		elif c == '6':
+			fmontant = input("Montant (débit précédé du signe -) : ")
+			
+			while True:
+				try:
+					fmontant = float(fmontant.replace(",", "."))
+				except ValueError:
+					print("Montant saisi invalide !")
+					fmontant = input("Montant (débit précédé du signe -) : ")
+				else:
+					break
+
+			# Fléchage débit / crédit
+			if fmontant < 0:
+				filtre["debit"] = abs(fmontant)
+				filtre["credit"] = 0
+			else:
+				filtre["debit"] = 0
+				filtre["credit"] = abs(fmontant)
+					
+		elif c == '7':
+			fsaisie = input("Date saisie : ")
+			
+			while not re.match(jm, fsaisie) and not re.match(jma, fsaisie):
+				print("La date n'est pas au bon format (jj/mm ou jj/mm/aaaa) !")
+				fsaisie = input("Date operation : ")
+				
+			fsaisie = conversionDate(fsaisie)
+			filtre["saisie"] = fsaisie
+	
+	print(filtre)
 	
 	
 # Filtre les operations selon plusieurs parametres
 # p est un dictionnaire attendant les cles suivantes : id, type, debut, fin, motif, verif, debit, credit, saisie
 def filterComptes(exercice, **p):
 
-	champs = { "id": 0, "type": 1, "date": 3, "motif": 4, "verif": 5, "debit": 6, "credit": 7, "saisie": 8 }
+	champs = { "id": 0, "type": 1, "date": 2, "motif": 3, "verif": 4, "debit": 5, "credit": 6, "saisie": 7 }
 
 	def conditions(**p):
 	
@@ -277,7 +365,6 @@ def filterComptes(exercice, **p):
 			return True
 		
 		return filtre
-	
 	
 	# Filtrage des operations sur la liste "exercice"
 	resultat = list(filter(conditions(**p), exercice))
