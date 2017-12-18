@@ -7,6 +7,8 @@ os.chdir("C:/Users/t-williamson/Data/perso/account") # Windows
 # Ligne a coller dans l'IDLE pour executer le fichier
 # exec(open("C:/Users/t-williamson/Data/perso/account/account.py").read(), globals())
 
+# cd C:/Users/t-williamson/Data/perso/account
+
 # Fichier contenant les fonctions necessaires au programme
 from functions import *
 

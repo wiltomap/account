@@ -26,9 +26,14 @@ import re
 import time
 import datetime
 
+
 # Patterns de dates pour fonction newOperation()
 jm = "^(0[1-9]|[1-2][0-9]|3[0-1])\/(0[1-9]|1[0-2])$" # format jj/mm
 jma = "^(0[1-9]|[1-2][0-9]|3[0-1])\/(0[1-9]|1[0-2])\/20[0-9]{2}$" # format jj/mm/aaaa
+
+
+# Annee en cours pour fonction newOperation()
+annee = str(datetime.date.today().year)
 
 
 # Fonction initiale
@@ -86,51 +91,50 @@ def check(exercice, id):
 	else:
 		print("Opération absente...")
 
-		
+
 # Conversion d'une date saisie en jj/mm ou jj/mm/aaaa -> aaaa-mm-jj
 def conversionDate(date):
 
 	if re.match(jm, date):
 	    date = "{}-{}-{}".format(annee, date[3:], date[:2])
-	
+
 	if re.match(jma, date):
 	    date = "{}-{}-{}".format(date[6:], date[3:5], date[:2])
-	
+
 	return date
-	
+
 
 # Ajout d'une nouvelle opération
 def newOperation(exercice):
 
 	id = max(exercice)[0] + 1
-	annee = str(datetime.date.today().year)
 
 	print("\nNouvelle operation :", "\n")
 
 	typ = input("Type : ")
 	date = input("Date : ")
-	
+
 	# Gestion de la date
 	while not re.match(jm, date) and not re.match(jma, date):
 		print("La date n'est pas au bon format (jj/mm ou jj/mm/aaaa) !")
 		date = input("Date : ")
-		
+
 	date = conversionDate(date)
-	
+
 	motif = input("Motif : ")
-	
+
 	# Gestion de l'entrée pour verif
 	verif = input("Vérifiée (1/0) ? ")
-	
+
 	while not verif == "1" and not verif == "0":
 		print("Saisie incorrecte (0 ou 1) !")
 		verif = input("Vérifiée (1/0) ? ")
-	
+
 	verif = int(verif)
-		
+
 	# Gestion du montant
 	montant = input("Montant (débits précédés du signe -) : ")
-	
+
 	while True:
 		try:
 			montant = float(montant.replace(",", "."))
@@ -150,7 +154,7 @@ def newOperation(exercice):
 
 	# Récupération date - heure de saisie
 	date_saisie = time.strftime("%Y-%m-%d %H:%M", time.localtime())
-		
+
 	# Ajout de la nouvelle opération
 	new = [id, typ, date, motif, verif, debit, credit, date_saisie]
 	exercice.append(new)
@@ -161,9 +165,9 @@ def newOperation(exercice):
 	# Confirme l'enregistrement
 	exercice = loadComptes("data")
 	check(exercice, id)
-	
+
 	# Affiche le menu
-	affichMenu(exercice)
+	affichMenu("data", exercice)
 
 
 # Fonction d'écriture dans le fichier
@@ -180,8 +184,8 @@ def loadComptes(fichier):
 		a = pickle.Unpickler(file)
 		comptes = a.load()
 	return comptes
-	
-	
+
+
 # Marque une opération comme vérifiée
 def marqOperation(fichier, exercice):
 	id = int(input("Identifiant de l'operation a marquer : "))
@@ -190,10 +194,10 @@ def marqOperation(fichier, exercice):
 			operation[4] = 1
 			print("L'operation {} a ete marquee comme vérifiee.".format(str(id)))
 			break
-	
+
 	# Sauvegarde de l'operation modifiee
 	saveComptes(fichier, exercice)
-	
+
 	# Recharge et affiche le fichier a jour
 	exercice = loadComptes(fichier)
 	affichMenu(fichier, exercice)
@@ -230,9 +234,9 @@ def affichComptes(fichier, exercice):
 	w_debit = 10
 	w_credit = 10
 	w_saisie = 18
-	
+
 	print("\n")
-	
+
 	for operation in exercice:
 
 		# Stockage des composantes d'une opération dans des variables
@@ -266,12 +270,12 @@ def affichComptes(fichier, exercice):
 		ligne = id + (ws_id * " ") + type + (ws_type * " ") + date + (2 * " ") +	motif + (ws_motif * " ") + verif + (ws_verif * " ") + (ws_debit * " ") + "-" + debit + (ws_credit * " ") + "+" + credit + (ws_saisie * " ") + saisie
 
 		print(ligne)
-	
+
 	# Affiche le menu
 	affichMenu(fichier, exercice)
 
 
-# Menu de filtrage	
+# Menu de filtrage
 def affichFilter():
 
 	id      = "1 : Filtrer par référence"
@@ -281,44 +285,44 @@ def affichFilter():
 	verif   = "5 : Filtrer par verification"
 	montant = "6 : Filtrer par montant"
 	saisie  = "7 : Filtrer par date de saisie"
-	
+
 	print("\n", id, type, date, motif, verif, montant, saisie, "\n", sep = "\n")
 
 	choix = input("Filtre(s) à appliquer ? ")
-	
+
 	filtre = dict()
-	
+
 	for c in choix:
-	
+
 		if c == '1':
 			fid = input("id : ")
 			filtre["id"] = int(fid)
-			
+
 		elif c == '2':
 			ftype = input("Type (CB / WEB / RET / DC / VIR / Numero de cheque): ")
 			filtre["type"] = ftype
-			
+
 		elif c == '3':
 			fdate = input("Date operation : ")
-			
+
 			while not re.match(jm, fdate) and not re.match(jma, fdate):
 				print("La date n'est pas au bon format (jj/mm ou jj/mm/aaaa) !")
 				fdate = input("Date operation : ")
-				
+
 			fdate = conversionDate(fdate)
 			filtre["date"] = fdate
-			
+
 		elif c == '4':
 			fmotif = input("Motif : ")
 			filtre["fmotif"] = fmotif
-			
+
 		elif c == '5':
 			fverif = input("Verification (0/1) : ")
 			filtre["verif"] = int(fverif)
-			
+
 		elif c == '6':
 			fmontant = input("Montant (débit précédé du signe -) : ")
-			
+
 			while True:
 				try:
 					fmontant = float(fmontant.replace(",", "."))
@@ -335,20 +339,20 @@ def affichFilter():
 			else:
 				filtre["debit"] = 0
 				filtre["credit"] = abs(fmontant)
-					
+
 		elif c == '7':
 			fsaisie = input("Date saisie : ")
-			
+
 			while not re.match(jm, fsaisie) and not re.match(jma, fsaisie):
 				print("La date n'est pas au bon format (jj/mm ou jj/mm/aaaa) !")
 				fsaisie = input("Date operation : ")
-				
+
 			fsaisie = conversionDate(fsaisie)
 			filtre["saisie"] = fsaisie
-	
+
 	print(filtre)
-	
-	
+
+
 # Filtre les operations selon plusieurs parametres
 # p est un dictionnaire attendant les cles suivantes : id, type, debut, fin, motif, verif, debit, credit, saisie
 def filterComptes(exercice, **p):
@@ -356,19 +360,19 @@ def filterComptes(exercice, **p):
 	champs = { "id": 0, "type": 1, "date": 2, "motif": 3, "verif": 4, "debit": 5, "credit": 6, "saisie": 7 }
 
 	def conditions(**p):
-	
+
 		def filtre(ope):
-		
+
 			for key, value in p.items():
 				if ope[champs[key]] != value:
 					return False
 			return True
-		
+
 		return filtre
-	
+
 	# Filtrage des operations sur la liste "exercice"
 	resultat = list(filter(conditions(**p), exercice))
-	
+
 	# Affichage du resultat
 	affichComptes("data", resultat)
 
